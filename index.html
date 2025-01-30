@@ -53,10 +53,12 @@
             session.updateRenderState({ baseLayer: xrLayer });
 
             function onFrame(time, frame) {
+                console.log('onFrame called');
                 const session = frame.session;
                 const pose = frame.getViewerPose(referenceSpace);
 
                 if (pose) {
+                    console.log('Pose obtained');
                     for (const view of pose.views) {
                         const viewport = session.renderState.baseLayer.getViewport(view);
                         renderer.setSize(viewport.width, viewport.height);
@@ -65,17 +67,22 @@
                         camera.applyMatrix4(viewMatrix);
                         renderer.render(scene, camera);
                     }
+                } else {
+                    console.log('No pose obtained');
                 }
 
                 session.requestAnimationFrame(onFrame);
             }
 
-           session.requestReferenceSpace('viewer').then((refSpace) => {
+            // Try different reference spaces
+            session.requestReferenceSpace('viewer').then((refSpace) => {
                 referenceSpace = refSpace;
+                console.log('Reference space: viewer');
                 session.requestAnimationFrame(onFrame);
             }).catch(() => {
                 session.requestReferenceSpace('local-floor').then((refSpace) => {
                     referenceSpace = refSpace;
+                    console.log('Reference space: local-floor');
                     session.requestAnimationFrame(onFrame);
                 }).catch(() => {
                     console.error('No supported reference space found.');
