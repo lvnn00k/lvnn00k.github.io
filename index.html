@@ -70,13 +70,20 @@
                 session.requestAnimationFrame(onFrame);
             }
 
-            session.requestReferenceSpace('viewer').then((referenceSpace) => {
+            session.requestReferenceSpace('viewer').then((refSpace) => {
+                referenceSpace = refSpace;
                 session.requestAnimationFrame(onFrame);
             }).catch(() => {
-                session.requestReferenceSpace('local-floor').then((referenceSpace) => {
+                session.requestReferenceSpace('local-floor').then((refSpace) => {
+                    referenceSpace = refSpace;
                     session.requestAnimationFrame(onFrame);
                 }).catch(() => {
-                    console.error('No supported reference space found.');
+                    session.requestReferenceSpace('local').then((refSpace) => {
+                        referenceSpace = refSpace;
+                        session.requestAnimationFrame(onFrame);
+                    }).catch(() => {
+                        console.error('No supported reference space found.');
+                    });
                 });
             });
         }
