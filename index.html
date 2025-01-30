@@ -70,8 +70,14 @@
                 session.requestAnimationFrame(onFrame);
             }
 
-            session.requestReferenceSpace('local').then((referenceSpace) => {
+            session.requestReferenceSpace('viewer').then((referenceSpace) => {
                 session.requestAnimationFrame(onFrame);
+            }).catch(() => {
+                session.requestReferenceSpace('local-floor').then((referenceSpace) => {
+                    session.requestAnimationFrame(onFrame);
+                }).catch(() => {
+                    console.error('No supported reference space found.');
+                });
             });
         }
     </script>
