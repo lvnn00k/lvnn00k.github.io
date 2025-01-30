@@ -3,65 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR Example</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+    <title>Three.ar.js Example</title>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="https://raw.githack.com/jeromeetienne/three.ar.js/master/build/three.ar.js"></script>
 </head>
 <body>
-    <button id="enter-xr">Enter XR</button>
     <script>
-        document.getElementById('enter-xr').addEventListener('click', () => {
-            if (navigator.xr) {
-                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                    if (supported) {
-                        console.log('immersive-ar is supported!');
-                        navigator.xr.requestSession('immersive-ar').then(onSessionStarted);
-                    } else {
-                        console.log('immersive-ar is not supported.');
-                    }
-                });
-            } else {
-                console.log('WebXR is not supported.');
-            }
+        THREEx.ArToolkitContext.baseURL = './'
+        THREEx.ArToolkitContext.loadDetectionCode(arToolkitSourceBundledDataURL, function () {
+            var arToolkitContext = new THREEx.ArToolkitContext({
+                cameraParametersUrl: THREEx.ArToolkitContext.baseURL + 'data/data/camera_para.dat',
+                detectionCodeUrl: THREEx.ArToolkitContext.baseURL + 'data/data/matrix_code3x3_parity6x6.dat',
+            })
+            arToolkitContext.init(function (onSuccess) {
+                var arWorldRoot = new THREE.Group()
+                scene.add(arWorldRoot)
+                new THREEx.ArMarkerControls(arToolkitContext, arWorldRoot, {
+                    type: 'pattern', patternUrl: THREEx.ArToolkitContext.baseURL + 'data/images/hiro.patt',
+                    changeMatrixMode: 'cameraTransformMatrix'
+                })
+                onSuccess()
+            })
+        })
 
-        });
+        var scene = new THREE.Scene()
+        var camera = new THREE.Camera()
+        scene.add(camera)
+        var renderer = new THREE.WebGLRenderer({
+            antialias: true, alpha: true,
+            canvas: document.createElement('canvas'),
+        })
+        renderer.setSize(640, 480)
+        renderer.domElement.style.position = 'absolute'
+        renderer.domElement.style.top = '0px'
+        renderer.domElement.style.left = '0px'
+        document.body.appendChild(renderer.domElement)
 
-        function onSessionStarted(session) {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
+        var geometry = new THREE.BoxGeometry(1, 1, 1)
+        var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 })
+        var cube = new THREE.Mesh(geometry, material)
+        scene.add(cube)
 
-            const geometry = new THREE.BoxGeometry();
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-
-            session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.getContext()) });
-
-            function onFrame(time, frame) {
-                const session = frame.session;
-                const pose = frame.getViewerPose(referenceSpace);
-
-                if (pose) {
-                    for (const view of pose.views) {
-                        const viewport = session.renderState.baseLayer.getViewport(view);
-                        renderer.setSize(viewport.width, viewport.height);
-                        camera.projectionMatrix.fromArray(view.projectionMatrix);
-                        const viewMatrix = new THREE.Matrix4().fromArray(view.transform.matrix);
-                        camera.applyMatrix4(viewMatrix);
-                        renderer.render(scene, camera);
-                    }
-                }
-
-                session.requestAnimationFrame(onFrame);
-            }
-
-            session.requestReferenceSpace('local').then((referenceSpace) => {
-                session.requestAnimationFrame(onFrame);
-            });
+        function animate() {
+            requestAnimationFrame(animate)
+            renderer.render(scene, camera)
         }
+        animate()
     </script>
 </body>
 </html>
