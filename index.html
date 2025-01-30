@@ -12,14 +12,14 @@
     <script>
         document.getElementById('enter-xr').addEventListener('click', () => {
             if (navigator.xr) {
-                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
                     if (supported) {
-                        document.body.innerHTML = 'immersive-ar is supported!';
-                        console.log('immersive-ar is supported!');
-                        navigator.xr.requestSession('immersive-ar').then(onSessionStarted);
+                        document.body.innerHTML = 'immersive-vr is supported!';
+                        console.log('immersive-vr is supported!');
+                        navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
                     } else {
-                        document.body.innerHTML = 'immersive-ar is not supported.';
-                        console.log('immersive-ar is not supported.');
+                        document.body.innerHTML = 'immersive-vr is not supported.';
+                        console.log('immersive-vr is not supported.');
                     }
                 });
             } else {
@@ -75,9 +75,9 @@
             }
 
             // Try different reference spaces
-            session.requestReferenceSpace('viewer').then((refSpace) => {
+            session.requestReferenceSpace('local').then((refSpace) => {
                 referenceSpace = refSpace;
-                console.log('Reference space: viewer');
+                console.log('Reference space: local');
                 session.requestAnimationFrame(onFrame);
             }).catch((error) => {
                 console.error('Failed to request reference space:', error);
