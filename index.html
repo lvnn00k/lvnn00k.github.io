@@ -12,22 +12,22 @@
     <script>
         document.getElementById('enter-xr').addEventListener('click', () => {
             if (navigator.xr) {
-                navigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
                     if (supported) {
-                        document.body.innerHTML = 'immersive-vr is supported!';
-                        console.log('immersive-vr is supported!');
-                        navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
+                        console.log('immersive-ar is supported!');
+                        navigator.xr.requestSession('immersive-ar').then(onSessionStarted).catch((error) => {
+                            console.error('Failed to start immersive-ar session:', error);
+                        });
                     } else {
-                        document.body.innerHTML = 'immersive-vr is not supported.';
-                        console.log('immersive-vr is not supported.');
+                        console.log('immersive-ar is not supported.');
                     }
                 });
             } else {
-                document.body.innerHTML = 'WebXR is not supported.';
                 console.log('WebXR is not supported.');
             }
-
         });
+
+        let referenceSpace;
 
         function onSessionStarted(session) {
             const scene = new THREE.Scene();
