@@ -44,7 +44,9 @@
             renderer.xr.enabled = true;
             renderer.xr.setSession(session);
 
-            session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.getContext()) });
+            const gl = renderer.getContext();
+            const xrLayer = new XRWebGLLayer(session, gl);
+            session.updateRenderState({ baseLayer: xrLayer });
 
             function onFrame(time, frame) {
                 const session = frame.session;
