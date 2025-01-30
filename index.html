@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Example</title>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+</head>
+<body>
+    <button id="enter-xr">Enter XR</button>
+    <script>
+        document.getElementById('enter-xr').addEventListener('click', () => {
+            if (navigator.xr) {
+                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
+                    if (supported) {
+                        console.log('immersive-ar is supported!');
+                        navigator.xr.requestSession('immersive-ar').then(onSessionStarted);
+                    } else {
+                        console.log('immersive-ar is not supported.');
+                    }
+                });
+            } else {
+                console.log('WebXR is not supported.');
+            }
+
+        });
+
+        function onSessionStarted(session) {
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const geometry = new THREE.BoxGeometry();
+            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+            const cube = new THREE.Mesh(geometry, material);
+            scene.add(cube);
+
+            session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.getContext()) });
+
+            function onFrame(time, frame) {
+                const session = frame.session;
+                const pose = frame.getViewerPose(referenceSpace);
+
+                if (pose) {
+                    for (const view of pose.views) {
+                        const viewport = session.renderState.baseLayer.getViewport(view);
+                        renderer.setSize(viewport.width, viewport.height);
+                        camera.projectionMatrix.fromArray(view.projectionMatrix);
+                        const viewMatrix = new THREE.Matrix4().fromArray(view.transform.matrix);
+                        camera.applyMatrix4(viewMatrix);
+                        renderer.render(scene, camera);
+                    }
+                }
+
+                session.requestAnimationFrame(onFrame);
+            }
+
+            session.requestReferenceSpace('local').then((referenceSpace) => {
+                session.requestAnimationFrame(onFrame);
+            });
+        }
+    </script>
+</body>
+</html>
