@@ -14,13 +14,16 @@
             if (navigator.xr) {
                 navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
                     if (supported) {
+                        document.body.innerHTML = 'immersive-ar is supported!';
                         console.log('immersive-ar is supported!');
                         navigator.xr.requestSession('immersive-ar').then(onSessionStarted);
                     } else {
+                        document.body.innerHTML = 'immersive-ar is not supported.';
                         console.log('immersive-ar is not supported.');
                     }
                 });
             } else {
+                document.body.innerHTML = 'WebXR is not supported.';
                 console.log('WebXR is not supported.');
             }
 
