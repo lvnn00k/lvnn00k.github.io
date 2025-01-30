@@ -70,7 +70,7 @@
                 session.requestAnimationFrame(onFrame);
             }
 
-            session.requestReferenceSpace('viewer').then((refSpace) => {
+           session.requestReferenceSpace('viewer').then((refSpace) => {
                 referenceSpace = refSpace;
                 session.requestAnimationFrame(onFrame);
             }).catch(() => {
@@ -78,12 +78,7 @@
                     referenceSpace = refSpace;
                     session.requestAnimationFrame(onFrame);
                 }).catch(() => {
-                    session.requestReferenceSpace('local').then((refSpace) => {
-                        referenceSpace = refSpace;
-                        session.requestAnimationFrame(onFrame);
-                    }).catch(() => {
-                        console.error('No supported reference space found.');
-                    });
+                    console.error('No supported reference space found.');
                 });
             });
         }
