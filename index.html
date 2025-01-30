@@ -41,6 +41,9 @@
             const cube = new THREE.Mesh(geometry, material);
             scene.add(cube);
 
+            renderer.xr.enabled = true;
+            renderer.xr.setSession(session);
+
             session.updateRenderState({ baseLayer: new XRWebGLLayer(session, renderer.getContext()) });
 
             function onFrame(time, frame) {
