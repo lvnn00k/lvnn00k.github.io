@@ -3,86 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebXR Example</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.124.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/webxr-polyfill@latest/build/webxr-polyfill.min.js"></script>
+    <title>ModelViewer Example</title>
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 </head>
 <body>
-    <button id="enter-xr">Enter XR</button>
-    <script>
-        document.getElementById('enter-xr').addEventListener('click', () => {
-            if (navigator.xr) {
-                navigator.xr.isSessionSupported('immersive-ar').then((supported) => {
-                    if (supported) {
-                        console.log('immersive-ar is supported!');
-                        navigator.xr.requestSession('immersive-ar').then(onSessionStarted).catch((error) => {
-                            console.error('Failed to start immersive-ar session:', error);
-                        });
-                    } else {
-                        console.log('immersive-ar is not supported.');
-                    }
-                });
-            } else {
-                console.log('WebXR is not supported.');
-            }
-        });
-
-        let referenceSpace;
-
-        function onSessionStarted(session) {
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-            const renderer = new THREE.WebGLRenderer({
-                antialias: true,
-                alpha: true,
-                context: document.createElement('canvas').getContext('webgl', { xrCompatible: true })
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            const geometry = new THREE.BoxGeometry();
-            const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const cube = new THREE.Mesh(geometry, material);
-            scene.add(cube);
-
-            renderer.xr.enabled = true;
-            renderer.xr.setSession(session);
-
-            const gl = renderer.getContext();
-            const xrLayer = new XRWebGLLayer(session, gl);
-            session.updateRenderState({ baseLayer: xrLayer });
-
-            function onFrame(time, frame) {
-                console.log('onFrame called');
-                const session = frame.session;
-                const pose = frame.getViewerPose(referenceSpace);
-
-                if (pose) {
-                    console.log('Pose obtained');
-                    for (const view of pose.views) {
-                        const viewport = session.renderState.baseLayer.getViewport(view);
-                        renderer.setSize(viewport.width, viewport.height);
-                        camera.projectionMatrix.fromArray(view.projectionMatrix);
-                        const viewMatrix = new THREE.Matrix4().fromArray(view.transform.matrix);
-                        camera.applyMatrix4(viewMatrix);
-                        renderer.render(scene, camera);
-                    }
-                } else {
-                    console.log('No pose obtained');
-                }
-
-                session.requestAnimationFrame(onFrame);
-            }
-
-            // Try different reference spaces
-            session.requestReferenceSpace('local').then((refSpace) => {
-                referenceSpace = refSpace;
-                console.log('Reference space: local');
-                session.requestAnimationFrame(onFrame);
-            }).catch((error) => {
-                console.error('Failed to request reference space:', error);
-            });
-        }
-    </script>
+    <model-viewer src="ImageToStl.com_cnek.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls></model-viewer>
 </body>
 </html>
